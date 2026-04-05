@@ -42,7 +42,6 @@ Visit `http://localhost:3000`.
 
 **backend/.env**
 ```
-ANTHROPIC_API_KEY=your_key_here
 DJANGO_SECRET_KEY=your_secret_key
 DEBUG=True
 MOCK_MODE=False
@@ -55,7 +54,7 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 
 ## Mock Mode
 
-Set `MOCK_MODE=True` in your backend `.env` to run without an Anthropic API key. Useful for frontend development and testing.
+Set `MOCK_MODE=True` in your backend `.env` to run without using AI models. Useful for frontend development and testing.
 
 ## Roadmap
 
