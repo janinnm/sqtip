@@ -1,0 +1,123 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #0a0a0b;
+  --surface-1: #111113;
+  --surface-2: #18181b;
+  --surface-3: #222226;
+  --surface-4: #2a2a2f;
+  --border: #2a2a2f;
+  --border-bright: #3a3a42;
+  --text: #e4e4e7;
+  --text-dim: #71717a;
+  --accent: #7c6af7;
+  --accent-dim: #4a3fa0;
+  --node-scan: #3b82f6;
+  --node-filter: #10b981;
+  --node-join: #f59e0b;
+  --node-aggregate: #8b5cf6;
+  --node-subquery: #ef4444;
+  --node-sort: #06b6d4;
+  --node-output: #6b7280;
+  --node-groupby: #ec4899;
+  --cost-low: #10b981;
+  --cost-medium: #f59e0b;
+  --cost-high: #ef4444;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: "DM Sans", sans-serif;
+  min-height: 100vh;
+}
+
+.cm-editor {
+  height: 100%;
+  font-family: "JetBrains Mono", monospace !important;
+  font-size: 13px !important;
+}
+
+.cm-editor.cm-focused {
+  outline: none !important;
+}
+
+.cm-scroller {
+  overflow: auto;
+}
+
+.react-flow__node {
+  cursor: default;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--surface-1);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--surface-4);
+  border-radius: 3px;
+}
+
+/* Markdown styles */
+.analysis-content h2 {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.analysis-content h2:first-child {
+  margin-top: 0;
+}
+
+.analysis-content p {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: #a1a1aa;
+  margin-bottom: 0.75rem;
+}
+
+.analysis-content ol,
+.analysis-content ul {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: #a1a1aa;
+  padding-left: 1.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.analysis-content li {
+  margin-bottom: 0.25rem;
+}
+
+.analysis-content code {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.8rem;
+  background: var(--surface-3);
+  padding: 0.1rem 0.3rem;
+  border-radius: 3px;
+  color: var(--accent);
+}
+
+.analysis-content strong {
+  color: var(--text);
+  font-weight: 500;
+}
