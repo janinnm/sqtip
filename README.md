@@ -11,7 +11,7 @@ SQTip helps developers and learners understand what their SQL queries are actual
 - **Backend** — Django, Django REST Framework
 - **Frontend** — Next.js, TypeScript, Tailwind CSS
 - **Diagram** — ReactFlow
-- **AI** — Anthropic Claude API (to be)
+- **AI** — Ollama
 
 ## Getting Started
 
