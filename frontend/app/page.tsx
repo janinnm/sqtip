@@ -1,5 +1,5 @@
 "use client";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import dynamic from "next/dynamic";
 import AnalysisPanel from "@/components/AnalysisPanel";
 
@@ -33,6 +33,8 @@ WHERE id IN (
 
 type Mode = "single" | "compare";
 
+type Theme = "dark" | "light";
+
 interface Structure {
   nodes: any[];
   edges: any[];
@@ -42,6 +44,23 @@ interface Structure {
 
 export default function Home() {
   const [mode, setMode] = useState<Mode>("single");
+  const [theme, setTheme] = useState<Theme>("dark");
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem("sqtip-theme");
+    if (saved === "light" || saved === "dark") {
+      setTheme(saved);
+    }
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    window.localStorage.setItem("sqtip-theme", theme);
+  }, [theme]);
+
+  const toggleTheme = useCallback(() => {
+    setTheme((current) => (current === "dark" ? "light" : "dark"));
+  }, []);
 
   // Single mode
   const [sql, setSql] = useState(SAMPLE_SINGLE);
@@ -67,10 +86,16 @@ export default function Home() {
         body: JSON.stringify({ sql }),
       });
       const data = await res.json();
-      setStructure(data.structure);
-      setAnalysis(data.analysis);
+      if (!res.ok) {
+        setAnalysis(`❌ ${data.error}`);
+        setStructure(null);
+      } else {
+        setStructure(data.structure);
+        setAnalysis(data.analysis);
+      }
     } catch (e) {
       setAnalysis("Error connecting to backend. Make sure Django is running.");
+      setStructure(null);
     }
     setLoading(false);
   }, [sql]);
@@ -85,233 +110,84 @@ export default function Home() {
         body: JSON.stringify({ sql1, sql2 }),
       });
       const data = await res.json();
-      setStructureA(data.query_a.structure);
-      setStructureB(data.query_b.structure);
-      setComparison(data.comparison);
+      if (!res.ok) {
+        setComparison(`❌ ${data.error}`);
+        setStructureA(null);
+        setStructureB(null);
+      } else {
+        setStructureA(data.query_a.structure);
+        setStructureB(data.query_b.structure);
+        setComparison(data.comparison);
+      }
     } catch (e) {
       setComparison(
         "Error connecting to backend. Make sure Django is running.",
       );
+      setStructureA(null);
+      setStructureB(null);
     }
     setLoadingCompare(false);
   }, [sql1, sql2]);
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "#0a0a0b",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      {/* Header */}
-      <header
-        style={{
-          borderBottom: "1px solid #2a2a2f",
-          padding: "0 24px",
-          height: "52px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          flexShrink: 0,
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <div
-            style={{
-              width: "22px",
-              height: "22px",
-              background: "#7c6af7",
-              borderRadius: "5px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-              <circle cx="6" cy="6" r="2" fill="white" />
-              <path
-                d="M6 1v2M6 9v2M1 6h2M9 6h2"
-                stroke="white"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-              />
-            </svg>
-          </div>
-          <span
-            style={{
-              fontWeight: 600,
-              fontSize: "15px",
-              letterSpacing: "-0.02em",
-            }}
-          >
-            SQTip
-          </span>
+    <div className="app-shell">
+      <header className="app-header">
+        <div className="brand">
+          sq<span className="brand-accent">tip</span>
         </div>
 
-        {/* Mode toggle */}
-        <div
-          style={{
-            display: "flex",
-            background: "#111113",
-            border: "1px solid #2a2a2f",
-            borderRadius: "6px",
-            padding: "3px",
-            gap: "2px",
-          }}
-        >
+        <div className="mode-toggle">
           {(["single", "compare"] as Mode[]).map((m) => (
             <button
               key={m}
+              className={`toggle-button ${mode === m ? "active" : ""}`}
               onClick={() => setMode(m)}
-              style={{
-                padding: "5px 14px",
-                borderRadius: "4px",
-                border: "none",
-                cursor: "pointer",
-                fontSize: "12px",
-                fontWeight: 500,
-                fontFamily: "DM Sans, sans-serif",
-                background: mode === m ? "#7c6af7" : "transparent",
-                color: mode === m ? "white" : "#71717a",
-                transition: "all 0.15s",
-              }}
+              type="button"
             >
               {m === "single" ? "Analyze" : "Compare"}
             </button>
           ))}
         </div>
 
-        <div style={{ width: "120px" }} />
+        <button className="theme-toggle" onClick={toggleTheme} type="button">
+          {theme === "dark" ? "Light mode" : "Dark mode"}
+        </button>
       </header>
 
-      {/* Single Mode */}
       {mode === "single" && (
-        <div
-          style={{
-            flex: 1,
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gridTemplateRows: "1fr 1fr",
-            gap: "1px",
-            background: "#2a2a2f",
-            overflow: "hidden",
-            height: "calc(100vh - 52px)",
-          }}
-        >
-          {/* Editor */}
-          <div
-            style={{
-              background: "#0a0a0b",
-              display: "flex",
-              flexDirection: "column",
-              overflow: "hidden",
-            }}
-          >
-            <div
-              style={{
-                padding: "10px 14px",
-                borderBottom: "1px solid #2a2a2f",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}
-            >
-              <span
-                style={{
-                  fontSize: "11px",
-                  color: "#52525b",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.08em",
-                  fontWeight: 600,
-                }}
-              >
-                SQL Query
-              </span>
+        <div className="main-grid">
+          <div className="panel-card full-height">
+            <div className="panel-header">
+              <span className="panel-title">SQL query</span>
               <button
+                className="theme-toggle"
                 onClick={runAnalysis}
+                type="button"
                 disabled={loading}
-                style={{
-                  background: "#7c6af7",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "5px",
-                  padding: "5px 14px",
-                  fontSize: "12px",
-                  fontWeight: 500,
-                  cursor: loading ? "not-allowed" : "pointer",
-                  opacity: loading ? 0.7 : 1,
-                  fontFamily: "DM Sans, sans-serif",
-                }}
               >
                 {loading ? "Analyzing..." : "Analyze →"}
               </button>
             </div>
-            <div style={{ flex: 1, overflow: "hidden" }}>
+            <div className="panel-body">
               <QueryEditor
                 value={sql}
                 onChange={setSql}
                 placeholder="Write your SQL query here..."
+                theme={theme}
               />
             </div>
           </div>
 
-          {/* Flow diagram */}
-          <div
-            style={{
-              background: "#0a0a0b",
-              display: "flex",
-              flexDirection: "column",
-              overflow: "hidden",
-            }}
-          >
-            <div
-              style={{
-                padding: "10px 14px",
-                borderBottom: "1px solid #2a2a2f",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}
-            >
-              <span
-                style={{
-                  fontSize: "11px",
-                  color: "#52525b",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.08em",
-                  fontWeight: 600,
-                }}
-              >
-                Execution Flow
-              </span>
+          <div className="panel-card full-height">
+            <div className="panel-header">
+              <span className="panel-title">Execution flow</span>
               {structure && (
-                <span
-                  style={{
-                    fontSize: "10px",
-                    padding: "2px 8px",
-                    borderRadius: "3px",
-                    fontWeight: 500,
-                    background:
-                      structure.estimated_cost === "low"
-                        ? "#10b98120"
-                        : structure.estimated_cost === "high"
-                          ? "#ef444420"
-                          : "#f59e0b20",
-                    color:
-                      structure.estimated_cost === "low"
-                        ? "#10b981"
-                        : structure.estimated_cost === "high"
-                          ? "#ef4444"
-                          : "#f59e0b",
-                  }}
-                >
+                <span className="status-chip">
                   {structure.estimated_cost} cost
                 </span>
               )}
             </div>
-            <div style={{ flex: 1 }}>
+            <div className="panel-body">
               <FlowDiagram
                 nodes={structure?.nodes || []}
                 edges={structure?.edges || []}
@@ -319,61 +195,19 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Warnings */}
-          <div
-            style={{
-              background: "#0a0a0b",
-              display: "flex",
-              flexDirection: "column",
-              overflow: "hidden",
-            }}
-          >
-            <div
-              style={{
-                padding: "10px 14px",
-                borderBottom: "1px solid #2a2a2f",
-              }}
-            >
-              <span
-                style={{
-                  fontSize: "11px",
-                  color: "#52525b",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.08em",
-                  fontWeight: 600,
-                }}
-              >
-                Static Warnings
-              </span>
+          <div className="panel-card full-height">
+            <div className="panel-header">
+              <span className="panel-title">Static warnings</span>
             </div>
-            <div style={{ flex: 1, padding: "16px", overflowY: "auto" }}>
+            <div className="panel-body panel-scroll">
               {structure?.warnings?.length ? (
                 structure.warnings.map((w, i) => (
-                  <div
-                    key={i}
-                    style={{
-                      display: "flex",
-                      gap: "8px",
-                      marginBottom: "10px",
-                      padding: "10px 12px",
-                      background: "#18181b",
-                      borderRadius: "5px",
-                      borderLeft: "3px solid #f59e0b",
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontSize: "12px",
-                        color: "#a1a1aa",
-                        lineHeight: 1.5,
-                      }}
-                    >
-                      {w}
-                    </span>
+                  <div key={i} className="panel-warning">
+                    {w}
                   </div>
                 ))
               ) : (
-                <p style={{ color: "#52525b", fontSize: "13px" }}>
+                <p className="empty-state">
                   {structure
                     ? "No warnings detected"
                     : "Run a query to see warnings"}
@@ -382,232 +216,71 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Analysis */}
-          <div
-            style={{
-              background: "#0a0a0b",
-              display: "flex",
-              flexDirection: "column",
-              overflow: "hidden",
-            }}
-          >
-            <div
-              style={{
-                padding: "10px 14px",
-                borderBottom: "1px solid #2a2a2f",
-              }}
-            >
-              <span
-                style={{
-                  fontSize: "11px",
-                  color: "#52525b",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.08em",
-                  fontWeight: 600,
-                }}
-              >
-                AI Analysis
-              </span>
+          <div className="panel-card full-height">
+            <div className="panel-header">
+              <span className="panel-title">AI analysis</span>
             </div>
-            <div style={{ flex: 1, overflow: "hidden" }}>
+            <div className="panel-body">
               <AnalysisPanel analysis={analysis} loading={loading} />
             </div>
           </div>
         </div>
       )}
 
-      {/* Compare Mode */}
       {mode === "compare" && (
-        <div
-          style={{
-            flex: 1,
-            display: "flex",
-            flexDirection: "column",
-            overflow: "hidden",
-            height: "calc(100vh - 52px)",
-          }}
-        >
-          {/* Top: two editors */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "1px",
-              background: "#2a2a2f",
-              height: "240px",
-              flexShrink: 0,
-            }}
-          >
-            {[
-              { label: "Query A", value: sql1, onChange: setSql1 },
-              { label: "Query B", value: sql2, onChange: setSql2 },
-            ].map(({ label, value, onChange }) => (
-              <div
-                key={label}
-                style={{
-                  background: "#0a0a0b",
-                  display: "flex",
-                  flexDirection: "column",
-                  overflow: "hidden",
-                }}
-              >
-                <div
-                  style={{
-                    padding: "10px 14px",
-                    borderBottom: "1px solid #2a2a2f",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: "11px",
-                      color: "#52525b",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.08em",
-                      fontWeight: 600,
-                    }}
-                  >
-                    {label}
-                  </span>
-                  {label === "Query B" && (
-                    <button
-                      onClick={runComparison}
-                      disabled={loadingCompare}
-                      style={{
-                        background: "#7c6af7",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "5px",
-                        padding: "5px 14px",
-                        fontSize: "12px",
-                        fontWeight: 500,
-                        cursor: loadingCompare ? "not-allowed" : "pointer",
-                        opacity: loadingCompare ? 0.7 : 1,
-                        fontFamily: "DM Sans, sans-serif",
-                      }}
-                    >
-                      {loadingCompare ? "Comparing..." : "Compare →"}
-                    </button>
-                  )}
-                </div>
-                <div style={{ flex: 1, overflow: "hidden" }}>
-                  <QueryEditor value={value} onChange={onChange} />
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Middle: two diagrams */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "1px",
-              background: "#2a2a2f",
-              flex: 1,
-              overflow: "hidden",
-            }}
-          >
-            {[
-              { label: "Flow A", structure: structureA },
-              { label: "Flow B", structure: structureB },
-            ].map(({ label, structure }) => (
-              <div
-                key={label}
-                style={{
-                  background: "#0a0a0b",
-                  display: "flex",
-                  flexDirection: "column",
-                  overflow: "hidden",
-                }}
-              >
-                <div
-                  style={{
-                    padding: "10px 14px",
-                    borderBottom: "1px solid #2a2a2f",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: "11px",
-                      color: "#52525b",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.08em",
-                      fontWeight: 600,
-                    }}
-                  >
-                    {label}
-                  </span>
-                  {structure && (
-                    <span
-                      style={{
-                        fontSize: "10px",
-                        padding: "2px 8px",
-                        borderRadius: "3px",
-                        fontWeight: 500,
-                        background:
-                          structure.estimated_cost === "low"
-                            ? "#10b98120"
-                            : structure.estimated_cost === "high"
-                              ? "#ef444420"
-                              : "#f59e0b20",
-                        color:
-                          structure.estimated_cost === "low"
-                            ? "#10b981"
-                            : structure.estimated_cost === "high"
-                              ? "#ef4444"
-                              : "#f59e0b",
-                      }}
-                    >
-                      {structure.estimated_cost} cost
-                    </span>
-                  )}
-                </div>
-                <div style={{ flex: 1 }}>
-                  <FlowDiagram
-                    nodes={structure?.nodes || []}
-                    edges={structure?.edges || []}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Bottom: comparison analysis */}
-          <div
-            style={{
-              height: "260px",
-              background: "#0a0a0b",
-              borderTop: "1px solid #2a2a2f",
-              display: "flex",
-              flexDirection: "column",
-              flexShrink: 0,
-            }}
-          >
-            <div
-              style={{
-                padding: "10px 14px",
-                borderBottom: "1px solid #2a2a2f",
-              }}
-            >
-              <span
-                style={{
-                  fontSize: "11px",
-                  color: "#52525b",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.08em",
-                  fontWeight: 600,
-                }}
-              >
-                Comparison Analysis
-              </span>
+        <div className="main-grid">
+          <div className="panel-card full-height">
+            <div className="panel-header">
+              <span className="panel-title">Query A</span>
             </div>
-            <div style={{ flex: 1, overflow: "hidden" }}>
+            <div className="panel-body">
+              <QueryEditor
+                value={sql1}
+                onChange={setSql1}
+                placeholder="First query"
+                theme={theme}
+              />
+            </div>
+          </div>
+
+          <div className="panel-card full-height">
+            <div className="panel-header">
+              <span className="panel-title">Query B</span>
+              <button
+                className="theme-toggle"
+                onClick={runComparison}
+                type="button"
+                disabled={loadingCompare}
+              >
+                {loadingCompare ? "Comparing..." : "Compare →"}
+              </button>
+            </div>
+            <div className="panel-body">
+              <QueryEditor
+                value={sql2}
+                onChange={setSql2}
+                placeholder="Second query"
+                theme={theme}
+              />
+            </div>
+          </div>
+
+          <div className="panel-card full-height">
+            <div className="panel-header">
+              <span className="panel-title">Comparison</span>
+            </div>
+            <div className="panel-body panel-scroll">
+              <p className="empty-state">
+                {comparison || "Run comparison to see the diff"}
+              </p>
+            </div>
+          </div>
+
+          <div className="panel-card full-height">
+            <div className="panel-header">
+              <span className="panel-title">Analysis</span>
+            </div>
+            <div className="panel-body">
               <AnalysisPanel analysis={comparison} loading={loadingCompare} />
             </div>
           </div>
