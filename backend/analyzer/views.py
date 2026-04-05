@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .sql_parser import extract_query_structure
-from .claude_service import analyze_query, compare_queries
+from .sql_ai_service import analyze_query, compare_queries
 from django.conf import settings
 
 MOCK_ANALYSIS = """

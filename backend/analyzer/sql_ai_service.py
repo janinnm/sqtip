@@ -1,6 +1,4 @@
-import anthropic
-from django.conf import settings
-
+import ollama
 
 def build_single_prompt(sql: str, structure: dict) -> str:
     warnings = "\n".join(f"- {w}" for w in structure.get("warnings", [])) or "None detected"
@@ -85,26 +83,34 @@ One sentence a learner should remember from this comparison.
 
 Be direct, specific, and educational. Avoid vague advice."""
 
-
 def analyze_query(sql: str, structure: dict) -> str:
-    client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
-    prompt = build_single_prompt(sql, structure)
-
-    message = client.messages.create(
-        model="claude-sonnet-4-20250514",
-        max_tokens=1000,
-        messages=[{"role": "user", "content": prompt}],
-    )
-    return message.content[0].text
-
+    try:
+        prompt = build_single_prompt(sql, structure)
+        
+        response = ollama.chat(
+            model='gemma3:4b',
+            messages=[{'role': 'user', 'content': prompt}],
+            options={'num_predict': 1000}
+        )
+        
+        return response['message']['content']
+    except Exception as e:
+        import traceback
+        print("Error in analyze_query:", e)
+        traceback.print_exc()
+        raise
 
 def compare_queries(sql1: str, sql2: str, structure1: dict, structure2: dict) -> str:
-    client = anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
-    prompt = build_compare_prompt(sql1, sql2, structure1, structure2)
-
-    message = client.messages.create(
-        model="claude-sonnet-4-20250514",
-        max_tokens=1200,
-        messages=[{"role": "user", "content": prompt}],
-    )
-    return message.content[0].text
+    try:
+        prompt = build_compare_prompt(sql1, sql2, structure1, structure2)
+        
+        response = ollama.chat(
+            model='gemma3:4b',
+            messages=[{'role': 'user', 'content': prompt}],
+            options={'num_predict': 1200}
+        )
+        
+        return response['message']['content']
+    except Exception as e:
+        print("Error in compare_queries:", e)
+        raise
