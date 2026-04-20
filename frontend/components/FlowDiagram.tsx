@@ -13,29 +13,29 @@ import "reactflow/dist/style.css";
 import { useEffect } from "react";
 
 const NODE_COLORS: Record<string, string> = {
-  scan: "#3b82f6",
-  filter: "#10b981",
-  join: "#f59e0b",
-  aggregate: "#8b5cf6",
-  subquery: "#ef4444",
-  sort: "#06b6d4",
-  output: "#6b7280",
-  groupby: "#ec4899",
+  scan: "var(--node-scan)",
+  filter: "var(--node-filter)",
+  join: "var(--node-join)",
+  aggregate: "var(--node-aggregate)",
+  subquery: "var(--node-subquery)",
+  sort: "var(--node-sort)",
+  output: "var(--node-output)",
+  groupby: "var(--node-groupby)",
 };
 
 const COST_COLORS: Record<string, string> = {
-  low: "#10b981",
-  medium: "#f59e0b",
-  high: "#ef4444",
+  low: "var(--cost-low)",
+  medium: "var(--cost-medium)",
+  high: "var(--cost-high)",
 };
 
 function SqlNode({ data }: { data: any }) {
-  const color = NODE_COLORS[data.type] || "#6b7280";
-  const costColor = COST_COLORS[data.cost] || "#6b7280";
+  const color = NODE_COLORS[data.type] || "var(--node-output)";
+  const costColor = COST_COLORS[data.cost] || "var(--node-output)";
   return (
     <div
       style={{
-        background: "#18181b",
+        background: "var(--surface-2)",
         border: `1px solid ${color}40`,
         borderLeft: `3px solid ${color}`,
         borderRadius: "6px",
@@ -81,7 +81,7 @@ function SqlNode({ data }: { data: any }) {
       <div
         style={{
           fontSize: "11px",
-          color: "#71717a",
+          color: "var(--text-dim)",
           fontFamily: "JetBrains Mono, monospace",
           whiteSpace: "nowrap",
           overflow: "hidden",

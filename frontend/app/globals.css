@@ -14,19 +14,44 @@
   --border-bright: #3a3a42;
   --text: #e4e4e7;
   --text-dim: #71717a;
-  --accent: #7c6af7;
-  --accent-dim: #4a3fa0;
+  --accent: #10b981;
+  --accent-dim: #059669;
   --node-scan: #3b82f6;
   --node-filter: #10b981;
   --node-join: #f59e0b;
-  --node-aggregate: #8b5cf6;
+  --node-aggregate: #059669;
   --node-subquery: #ef4444;
   --node-sort: #06b6d4;
   --node-output: #6b7280;
-  --node-groupby: #ec4899;
+  --node-groupby: #047857;
   --cost-low: #10b981;
   --cost-medium: #f59e0b;
   --cost-high: #ef4444;
+}
+
+[data-theme="light"] {
+  --bg: #ffffff;
+  --surface-1: #f8f9fa;
+  --surface-2: #e9ecef;
+  --surface-3: #dee2e6;
+  --surface-4: #ced4da;
+  --border: #ced4da;
+  --border-bright: #adb5bd;
+  --text: #212529;
+  --text-dim: #6c757d;
+  --accent: #10b981;
+  --accent-dim: #059669;
+  --node-scan: #0d6efd;
+  --node-filter: #10b981;
+  --node-join: #fd7e14;
+  --node-aggregate: #059669;
+  --node-subquery: #dc3545;
+  --node-sort: #0dcaf0;
+  --node-output: #6c757d;
+  --node-groupby: #047857;
+  --cost-low: #10b981;
+  --cost-medium: #fd7e14;
+  --cost-high: #dc3545;
 }
 
 * {
@@ -120,4 +145,165 @@ body {
 .analysis-content strong {
   color: var(--text);
   font-weight: 500;
+}
+
+/* App layout */
+.app-shell {
+  min-height: 100vh;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+}
+
+.app-header {
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.brand {
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.brand-accent {
+  color: var(--accent);
+}
+
+.mode-toggle {
+  display: flex;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 3px;
+  gap: 2px;
+}
+
+.toggle-button {
+  padding: 5px 14px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: "DM Sans", sans-serif;
+  background: transparent;
+  color: var(--text-dim);
+  transition: all 0.15s;
+}
+
+.toggle-button.active {
+  background: var(--accent);
+  color: white;
+}
+
+.theme-toggle {
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: "DM Sans", sans-serif;
+  transition: all 0.15s;
+}
+
+.theme-toggle:hover:not(:disabled) {
+  background: var(--accent-dim);
+}
+
+.theme-toggle:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.main-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  overflow: hidden;
+  height: calc(100vh - 52px);
+}
+
+.panel-card {
+  background: var(--surface-1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.panel-card.full-height {
+  height: 100%;
+}
+
+.panel-header {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.panel-title {
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+}
+
+.panel-body {
+  flex: 1;
+  overflow: hidden;
+}
+
+.panel-scroll {
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.panel-warning {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  background: var(--surface-2);
+  border-radius: 5px;
+  border-left: 3px solid var(--cost-medium);
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+.empty-state {
+  color: var(--text-dim);
+  font-size: 13px;
+}
+
+.status-chip {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-weight: 500;
+  background: var(--cost-low) 20;
+  color: var(--cost-low);
+}
+/* Error message styling */
+.analysis-content p:first-child {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--cost-high);
+  margin-bottom: 1rem;
 }
